@@ -1,0 +1,2 @@
+# scons-test
+Testing SCons
