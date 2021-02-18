@@ -1,9 +1,6 @@
-env = Environment()
-debug = ARGUMENTS.get('debug', 0)
-if int(debug):
-    env.Append(CCFLAGS='-g -Wall -Werror -Wextra -pedantic')
-else:
-    env.Append(CCFLAGS="-O2")
+Import("env")
 
-env.Library("dyn_array", Split("dyn_array.h dyn_array.c"))
-env.Program("hello", ["hello.c"], LIBS=["dyn_array"], LIBPATH=".")
+env.Library("data_structures", ["data_structures/dyn_array.c"])
+env.Program("hello", ["hello.c"],
+            LIBS=["data_structures"],
+            LIBPATH=["."])

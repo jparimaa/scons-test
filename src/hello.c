@@ -1,4 +1,4 @@
-#include "dyn_array.h"
+#include "data_structures/dyn_array.h"
 #include <stdio.h>
 
 struct my_struct

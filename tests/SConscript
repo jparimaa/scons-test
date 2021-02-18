@@ -1,0 +1,6 @@
+Import("env")
+
+env.Program("dyn_array_test", ["dyn_array.c"],
+            LIBS=["check", "m", "pthread", "rt", "subunit", "data_structures"],
+            LIBPATH=["#build/"],
+            CPPPATH=["#src/"])
