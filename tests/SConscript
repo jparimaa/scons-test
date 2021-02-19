@@ -1,6 +1,9 @@
 Import("env")
 
-env.Program("dyn_array_test", ["dyn_array.c"],
-            LIBS=["check", "m", "pthread", "rt", "subunit", "data_structures"],
-            LIBPATH=["#build/"],
-            CPPPATH=["#src/"])
+dyn_array_test = env.Program("dyn_array_test", ["dyn_array.c"],
+                             LIBS=["check", "m", "pthread", "rt",
+                                   "subunit", "data_structures"],
+                             LIBPATH=["#build/"],
+                             CPPPATH=["#src/"])
+
+env.Alias("test", dyn_array_test)
