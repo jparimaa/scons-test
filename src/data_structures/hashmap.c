@@ -1,4 +1,5 @@
 #include "hashmap.h"
+#include "linked_list.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -7,18 +8,17 @@ static const float c_fill_limit = 0.6f;
 struct hash_info
 {
     unsigned long id;
-    size_t bucket;
-    struct item* item_ptr;
+    struct linked_list* bucket;
 };
 
 static struct hash_info get_hash_info(const struct hashmap* h, const void* key)
 {
     struct hash_info info;
     info.id = hash(key, h->key_size);
-    info.bucket = info.id % h->reserved_buckets;
-    const size_t offset = info.bucket * h->value_size;
-    char* data_ptr = h->data;
-    info.item_ptr = (struct item*)(&data_ptr[offset]);
+    const size_t bucket_index = info.id % h->reserved_buckets;
+    const size_t offset = bucket_index * sizeof(struct linked_list);
+    char* buckets_ptr = h->buckets;
+    info.bucket = (struct linked_list*)(&buckets_ptr[offset]);
     return info;
 }
 
@@ -39,63 +39,118 @@ struct hashmap* hashmap_create(size_t key_size, size_t value_size)
     self->key_size = key_size;
     self->value_size = value_size;
     self->reserved_buckets = 32;
-    self->data = calloc(self->reserved_buckets, sizeof(struct item));
+    self->buckets = calloc(self->reserved_buckets, sizeof(struct linked_list));
     return self;
 }
 
-bool hashmap_add(struct hashmap* self, const void* key, const void* value)
+void hashmap_set(struct hashmap* self, const void* key, const void* value)
 {
     if ((float)self->used_buckets / (float)self->reserved_buckets > c_fill_limit)
     {
         self->reserved_buckets = (self->reserved_buckets * 4);
-        self->data = realloc(self->data, self->reserved_buckets * sizeof(struct item));
+        self->buckets = realloc(self->buckets, self->reserved_buckets * sizeof(struct item));
     }
 
     struct hash_info info = get_hash_info(self, key);
 
-    if (info.item_ptr != NULL)
+    if (info.bucket != NULL)
     {
-        // Todo: handle collision
+        struct linked_list_node* current = info.bucket->begin;
+        while (current != NULL)
+        {
+            struct item* i = current->data;
+            if (i->id == info.id)
+            {
+                memcpy(i->value, value, self->value_size);
+                return;
+            }
+            current = current->next;
+        }
     }
     else
     {
-        info.item_ptr->id = info.id;
-        info.item_ptr->value = malloc(self->value_size);
-        memcpy(info.item_ptr->value, value, self->value_size);
-        ++self->used_buckets;
+        info.bucket = linked_list_create(sizeof(struct item));
     }
-    return true;
+
+    struct item new_item;
+    new_item.id = info.id;
+    new_item.value = malloc(self->value_size);
+    memcpy(new_item.value, value, self->value_size);
+    linked_list_push_back(info.bucket, &new_item);
+    ++self->used_buckets;
 }
 
 bool hashmap_remove(struct hashmap* self, const void* key)
 {
     struct hash_info info = get_hash_info(self, key);
-
-    if (info.item_ptr != NULL)
+    if (info.bucket == NULL)
     {
-        // Todo: handle multiple values
-        free(info.item_ptr->value);
-        memset(info.item_ptr, 0, sizeof(struct item));
-        --self->used_buckets;
-        return true;
+        return false;
     }
+
+    struct linked_list_node* current = info.bucket->begin;
+    while (current != NULL)
+    {
+        struct item* i = current->data;
+        if (i->id == info.id)
+        {
+            free(i->value);
+            linked_list_remove(info.bucket, current);
+            if (info.bucket->size == 0)
+            {
+                --self->used_buckets;
+            }
+            return true;
+        }
+        current = current->next;
+    }
+
     return false;
 }
 
 void* hashmap_get(struct hashmap* self, const void* key)
 {
     struct hash_info info = get_hash_info(self, key);
-    return info.item_ptr->value;
+
+    if (info.bucket == NULL)
+    {
+        return NULL;
+    }
+
+    struct linked_list_node* current = info.bucket->begin;
+    const unsigned long id = hash(key, self->key_size);
+    while (current != NULL)
+    {
+        struct item* i = current->data;
+        if (i->id == id)
+        {
+            return i->value;
+        }
+        current = current->next;
+    }
+    return NULL;
 }
 
 void hashmap_destroy(struct hashmap* self)
 {
-    struct item* item_ptr = self->data;
+    struct linked_list* list = self->buckets;
     for (size_t i = 0; i < self->reserved_buckets; ++i)
     {
-        free(item_ptr->value);
-        ++item_ptr;
+        if (list == NULL)
+        {
+            continue;
+        }
+
+        struct linked_list_node* current = list->begin;
+        while (current != NULL)
+        {
+            struct item* i = current->data;
+            free(i->value);
+            current = current->next;
+        }
+        linked_list_destroy(list);
+        ++list;
     }
-    free(self->data);
+    free(self->buckets);
     free(self);
 }

@@ -10,7 +10,7 @@ struct hashmap
     size_t used_buckets;
     size_t key_size;
     size_t value_size;
-    void* data;
+    void* buckets;
 };
 
 struct item
@@ -22,7 +22,7 @@ struct item
 unsigned long hash(const char* data, size_t length);
 
 struct hashmap* hashmap_create(size_t key_size, size_t value_size);
-bool hashmap_add(struct hashmap* self, const void* key, const void* value);
+void hashmap_set(struct hashmap* self, const void* key, const void* value);
 bool hashmap_remove(struct hashmap* self, const void* key);
 void* hashmap_get(struct hashmap* self, const void* key);
 void hashmap_destroy(struct hashmap* self);

@@ -1,7 +1,10 @@
 Import("env")
 
 data_structures_lib = env.Library(
-    "data_structures", ["data_structures/dyn_array.c", "data_structures/hashmap.c"])
+    "data_structures", [
+        "data_structures/dyn_array.c",
+        "data_structures/hashmap.c",
+        "data_structures/linked_list.c"])
 hello_prog = env.Program("hello", ["hello.c"],
                          LIBS=["data_structures"],
                          LIBPATH=["."])

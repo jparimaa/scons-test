@@ -73,7 +73,7 @@ END_TEST
 Suite* test_suite(void)
 {
     Suite* suite = suite_create("dyn_array_suite");
-    TCase* test_case = tcase_create("basic");
+    TCase* test_case = tcase_create("dyn_array_basic");
 
     tcase_add_checked_fixture(test_case, setup, teardown);
     tcase_add_test(test_case, test_dyn_array_data);
