@@ -48,6 +48,19 @@ START_TEST(test_linked_list_remove)
     ck_assert(test_list->begin == first);
     ck_assert(test_list->begin->next != second);
 
+    struct test_data* t = test_list->begin->data;
+    ck_assert_int_eq(t->a, 0);
+    ck_assert_int_eq(t->b, 0);
+    ck_assert_int_eq(t->c, 10);
+    t = test_list->begin->next->data;
+    ck_assert_int_eq(t->a, 11);
+    ck_assert_int_eq(t->b, 22);
+    ck_assert_int_eq(t->c, 21);
+    t = test_list->end->data;
+    ck_assert_int_eq(t->a, 199);
+    ck_assert_int_eq(t->b, 398);
+    ck_assert_int_eq(t->c, 209);
+
     current = test_list->begin;
     for (int i = 0; i < 100; ++i)
     {

@@ -44,6 +44,14 @@ bool linked_list_remove(struct linked_list* self, const struct linked_list_node*
             {
                 current->next->previous = current->previous;
             }
+            if (current == self->begin)
+            {
+                self->begin = current->next;
+            }
+            if (current == self->end)
+            {
+                self->begin = current->previous;
+            }
             free(current->data);
             free(current);
             --self->size;

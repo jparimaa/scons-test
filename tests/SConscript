@@ -14,4 +14,9 @@ linked_list_test = env.Program("linked_list_test", ["linked_list.c"],
                                LIBPATH=["#build/"],
                                CPPPATH=["#src/"])
 
-env.Alias("test", [dyn_array_test, linked_list_test])
+hashmap_test = env.Program("hashmap_test", ["hashmap.c"],
+                           LIBS=libs,
+                           LIBPATH=["#build/"],
+                           CPPPATH=["#src/"])
+
+env.Alias("test", [dyn_array_test, linked_list_test, hashmap_test])

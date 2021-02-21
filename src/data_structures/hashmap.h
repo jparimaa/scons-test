@@ -1,6 +1,7 @@
 #ifndef hashmap_h
 #define hashmap_h
 
+#include "linked_list.h"
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -10,7 +11,7 @@ struct hashmap
     size_t used_buckets;
     size_t key_size;
     size_t value_size;
-    void* buckets;
+    struct linked_list** buckets;
 };
 
 struct item
