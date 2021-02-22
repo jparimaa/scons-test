@@ -5,8 +5,11 @@ data_structures_lib = env.Library(
         "data_structures/dyn_array.c",
         "data_structures/hashmap.c",
         "data_structures/linked_list.c"])
+
 hello_prog = env.Program("hello", ["hello.c"],
                          LIBS=["data_structures"],
                          LIBPATH=["."])
 
-env.Alias("apps", hello_prog)
+inheritance_prog = env.Program("inheritance", ["inheritance.c"])
+
+env.Alias("apps", [hello_prog, inheritance_prog])
